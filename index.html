@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>期程排程與與會人員管理系統</title>
-  <!-- Tailwind CSS -->
+  <title>期程排程與人員管理系統</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons CDN -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <!-- Google Fonts: Inter & Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Phosphor Icons -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
@@ -23,9 +24,9 @@
             brand: {
               50: '#f0fdfa',
               100: '#ccfbf1',
-              500: '#0d9488',
-              600: '#0f766e',
-              700: '#115e59',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
             }
           }
         }
@@ -33,13 +34,17 @@
     }
   </script>
   <style>
-    /* 舒適柔和淺色自訂樣式 */
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #f8fafc;
+    }
+    /* 自訂簡約捲軸 */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #f8fafc;
+      background: transparent;
     }
     ::-webkit-scrollbar-thumb {
       background: #cbd5e1;
@@ -48,237 +53,191 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
-    .soft-bg {
-      background: radial-gradient(circle at 10% 10%, #fbfcfd 0%, #f3f5f8 50%, #ebedf3 100%);
-    }
-    .frosted-glass {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-    }
   </style>
 </head>
-<body class="soft-bg text-slate-700 font-sans min-h-screen flex flex-col antialiased selection:bg-teal-100 selection:text-teal-800">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col bg-slate-50/60">
 
-  <header class="sticky top-0 z-30 frosted-glass border-b border-slate-200/80 shadow-xs">
+  <!-- 頂部導航列 -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/80 transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- 系統標題 -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
+        <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-xs">
           <i class="ph-bold ph-calendar-check text-xl"></i>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">期程排程管理系統</h1>
-            <span id="roleBadge" class="text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+          <h1 class="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            期程排程系統
+            <span id="roleBadge" class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600 border border-slate-200">
               訪客唯讀
             </span>
-          </div>
-          <p class="text-xs text-slate-400 hidden sm:block">簡約排程時序規劃 × 與會人員名單整合</p>
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">簡約舒適的排程與與會人員協作看板</p>
         </div>
       </div>
 
+      <!-- 右側管理權限與操作按鈕 -->
       <div class="flex items-center gap-2.5">
-        <!-- Role Status Indicator -->
-        <div id="roleIndicator" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-slate-100 text-slate-600 border-slate-200">
-          <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-          <span id="roleText">唯讀檢視模式</span>
-        </div>
-
-        <!-- Role Toggle Button -->
-        <button id="authToggleBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 shadow-2xs hover:shadow-xs transition">
-          <i id="authIcon" class="ph-bold ph-lock-key text-teal-600"></i>
-          <span id="authActionLabel">管理員解鎖</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
-    
-    <!-- Top Metrics Overview -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white/80 backdrop-blur rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
-        <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-2xl">
-          <i class="ph-duotone ph-calendar-blank"></i>
-        </div>
-        <div>
-          <p class="text-xs font-medium text-slate-400">總排程項目</p>
-          <h3 id="statTotalShows" class="text-2xl font-bold text-slate-800">0</h3>
-        </div>
-      </div>
-
-      <div class="bg-white/80 backdrop-blur rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
-        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl">
-          <i class="ph-duotone ph-hourglass-high"></i>
-        </div>
-        <div>
-          <p class="text-xs font-medium text-slate-400">進行中排程</p>
-          <h3 id="statActiveShows" class="text-2xl font-bold text-slate-800">0</h3>
-        </div>
-      </div>
-
-      <div class="bg-white/80 backdrop-blur rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
-        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
-          <i class="ph-duotone ph-users-three"></i>
-        </div>
-        <div>
-          <p class="text-xs font-medium text-slate-400">與會人員人數</p>
-          <h3 id="statTotalCrew" class="text-2xl font-bold text-slate-800">0</h3>
-        </div>
-      </div>
-
-      <div class="bg-white/80 backdrop-blur rounded-2xl p-4 border border-slate-200/80 shadow-xs flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-700 tracking-wide uppercase flex items-center gap-1.5">
-            <i class="ph-bold ph-shield-check text-teal-600"></i>
-            權限狀態
-          </span>
-          <span id="permHintBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">唯讀</span>
-        </div>
-        <p id="adminStatusHint" class="text-xs text-slate-400 mt-1 leading-relaxed">
-          目前為訪客檢視模式。點擊右上角解鎖管理員以新增或刪除排程與人員。
-        </p>
-      </div>
-    </div>
-
-    <!-- 單一整合檢視區 (左側: 排程時序，右側: 與會人員) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      
-      <!-- 排程時序區塊 (佔 8 欄) -->
-      <section class="lg:col-span-8 bg-white/90 backdrop-blur rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col gap-4">
-        <!-- 排程區塊頂部工具列 -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-          <div>
-            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i class="ph-bold ph-calendar text-teal-600"></i>
-              排程時序清單
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">依開始日期排序，直覺掌握時程規劃</p>
-          </div>
-          
-          <button id="openAddScheduleBtn" onclick="handleOpenAddSchedule()" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 active:scale-98 transition shadow-xs disabled:opacity-40 disabled:cursor-not-allowed">
-            <i class="ph-bold ph-plus-circle text-sm"></i>
+        <div id="adminActionButtons" class="hidden flex items-center gap-2">
+          <button onclick="openAddAttendeeModal()" class="px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+            <i class="ph-bold ph-user-plus text-sm"></i>
+            <span class="hidden md:inline">新增人員</span>
+          </button>
+          <button onclick="openAddScheduleModal()" class="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs">
+            <i class="ph-bold ph-plus text-sm"></i>
             <span>新增排程</span>
           </button>
         </div>
 
-        <!-- 篩選器 -->
-        <div class="flex flex-wrap items-center gap-2 text-xs">
-          <div class="relative flex-1 min-w-[180px]">
-            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" id="scheduleSearchInput" placeholder="搜尋排程名稱..." class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 text-xs transition">
+        <button id="adminToggleBtn" onclick="toggleAdminModal()" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs">
+          <i id="adminLockIcon" class="ph-bold ph-lock text-slate-500 text-sm"></i>
+          <span id="adminToggleText">管理員解鎖</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 狀態摘要條 -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg">
+          <i class="ph-bold ph-calendar"></i>
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-medium block">排程總數</span>
+          <span id="statTotal" class="text-lg font-bold text-slate-800">0</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+          <i class="ph-bold ph-hourglass-high"></i>
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-medium block">進行中</span>
+          <span id="statOngoing" class="text-lg font-bold text-amber-600">0</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+          <i class="ph-bold ph-check-circle"></i>
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-medium block">已完成</span>
+          <span id="statCompleted" class="text-lg font-bold text-emerald-600">0</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+          <i class="ph-bold ph-users"></i>
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-medium block">與會人員</span>
+          <span id="statAttendees" class="text-lg font-bold text-indigo-600">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 單一檢視主要內容網格：左側排程時程 (2/3)、右側與會人員名單 (1/3) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- 左側：排程規劃時序 -->
+      <section class="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 flex flex-col">
+        <!-- 區塊標題與篩選控制 -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-slate-900">排程時程表</h2>
+            <span id="scheduleCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">0 項</span>
           </div>
 
-          <select id="statusFilter" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-xs font-medium">
-            <option value="all">所有狀態</option>
-            <option value="未開始">未開始</option>
-            <option value="進行中">進行中</option>
-            <option value="已完成">已完成</option>
-          </select>
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- 搜尋框 -->
+            <div class="relative w-full sm:w-44">
+              <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="searchInput" oninput="handleFilterChange()" placeholder="搜尋排程或地點..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
+            </div>
 
-          <select id="crewFilter" class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 text-xs font-medium">
-            <option value="all">所有人員</option>
-          </select>
+            <!-- 狀態篩選 -->
+            <select id="statusFilter" onchange="handleFilterChange()" class="py-1.5 px-2.5 text-xs rounded-xl bg-slate-50 border border-slate-200 text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
+              <option value="ALL">全部狀態</option>
+              <option value="未開始">未開始</option>
+              <option value="進行中">進行中</option>
+              <option value="已完成">已完成</option>
+            </select>
+          </div>
         </div>
 
-        <!-- 排程內容列表 (單一時間軸展示) -->
-        <div id="timelineContainer" class="relative pl-6 border-l-2 border-teal-200 space-y-4 my-2">
-          <!-- 項目由 JS 動態注入 -->
+        <!-- 排程列表或時間軸內容 -->
+        <div id="scheduleListContainer" class="mt-5 space-y-3.5 flex-1">
+          <!-- 動態載入排程卡片 -->
         </div>
       </section>
 
-      <!-- 與會人員名單區塊 (佔 4 欄) -->
-      <section class="lg:col-span-4 bg-white/90 backdrop-blur rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col gap-4">
-        <!-- 人員區塊頂部工具列 -->
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div>
-            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-              <i class="ph-bold ph-users text-teal-600"></i>
-              與會人員
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">名冊與參與排程統計</p>
+      <!-- 右側：與會人員名單 -->
+      <section class="lg:col-span-4 bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 flex flex-col">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-slate-900">與會人員名單</h2>
+            <span id="attendeeCountBadge" class="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-medium">0 位</span>
           </div>
-          
-          <button id="openAddAttendeeBtn" onclick="handleOpenAddAttendee()" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-2xs active:scale-98 transition disabled:opacity-40 disabled:cursor-not-allowed">
-            <i class="ph-bold ph-user-plus text-teal-600"></i>
-            <span>新增人員</span>
+
+          <button id="addAttendeeHeaderBtn" onclick="openAddAttendeeModal()" class="text-xs text-indigo-600 font-semibold hover:text-indigo-800 flex items-center gap-1 transition">
+            <i class="ph-bold ph-plus text-xs"></i> 新增人員
           </button>
         </div>
 
-        <!-- 人員名冊卡片列表 -->
-        <div id="crewListGrid" class="flex flex-col gap-2.5">
-          <!-- 成員由 JS 動態注入 -->
+        <!-- 人員卡片容器 -->
+        <div id="attendeeListContainer" class="mt-4 space-y-2.5 max-h-[680px] overflow-y-auto pr-1">
+          <!-- 動態載入人員名片 -->
         </div>
       </section>
 
     </div>
-
   </main>
 
-  <div id="authModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100">
-      <div class="w-12 h-12 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center text-xl mb-4 mx-auto">
-        <i class="ph-bold ph-shield-check"></i>
-      </div>
-      <h3 class="text-center text-base font-bold text-slate-800">管理員身分驗證</h3>
-      <p class="text-center text-xs text-slate-500 mt-1 mb-5">
-        請輸入管理密碼，以解鎖排程與與會人員的「新增」與「刪除」功能。<br>
-        <span class="text-slate-400 text-[11px]">(預設管理密碼：<strong class="text-teal-600 font-mono">admin888</strong>)</span>
-      </p>
-
-      <form id="authForm" onsubmit="event.preventDefault(); verifyAdminPassword();" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">管理員密碼</label>
-          <div class="relative">
-            <input type="password" id="adminPasswordInput" placeholder="請輸入管理密碼..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
-            <button type="button" onclick="togglePasswordVis()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-              <i id="eyeIcon" class="ph ph-eye"></i>
-            </button>
-          </div>
-          <p id="authErrorMsg" class="text-xs text-rose-500 mt-1.5 hidden flex items-center gap-1">
-            <i class="ph-bold ph-warning-circle"></i>
-            <span>密碼不正確，請重新輸入。</span>
-          </p>
-        </div>
-
-        <div class="flex items-center gap-2 pt-2">
-          <button type="button" onclick="closeAuthModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
-            取消
-          </button>
-          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 shadow-sm transition">
-            確認解鎖
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div id="addScheduleModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+  <!-- 模態視窗 1：排程 新增 / 編輯 Modal -->
+  <div id="scheduleModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-100 max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-            <i class="ph-bold ph-calendar-plus"></i>
+            <i id="scheduleModalIcon" class="ph-bold ph-calendar-plus text-lg"></i>
           </div>
-          <h3 class="text-base font-bold text-slate-800">新增排程項目</h3>
+          <h3 id="scheduleModalTitle" class="text-base font-bold text-slate-800">新增排程項目</h3>
         </div>
-        <button onclick="closeAddScheduleModal()" class="text-slate-400 hover:text-slate-600 p-1">
+        <button onclick="closeScheduleModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
           <i class="ph-bold ph-x text-lg"></i>
         </button>
       </div>
 
-      <form id="addScheduleForm" onsubmit="event.preventDefault(); submitNewSchedule();" class="mt-4 space-y-4">
+      <form id="scheduleForm" onsubmit="event.preventDefault(); submitScheduleForm();" class="mt-4 space-y-4">
+        <input type="hidden" id="schedEditId" value="">
+
+        <!-- 排程名稱 -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">排程名稱 <span class="text-rose-500">*</span></label>
-          <input type="text" id="schedTitle" required placeholder="例如：XX音樂祭" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">
+            排程名稱 <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="schedTitle" required placeholder="例如：XX音樂祭" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
         </div>
 
+        <!-- 自行輸入地點 -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">地點 <span class="text-slate-400 font-normal">(選填)</span></label>
-          <input type="text" id="schedLocation" placeholder="例如：主舞台、大佳河濱公園、台北流行音樂中心" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">
+            地點 <span class="text-slate-400 font-normal">(選填)</span>
+          </label>
+          <input type="text" id="schedLocation" placeholder="例如：主舞台、大佳河濱公園、台北流行音樂中心" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
         </div>
 
+        <!-- 狀態選擇 -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">狀態</label>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">進度狀態</label>
           <select id="schedStatus" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500">
             <option value="未開始" selected>未開始</option>
             <option value="進行中">進行中</option>
@@ -286,6 +245,7 @@
           </select>
         </div>
 
+        <!-- 純日期欄位：開始日期 (必填) 與 結束日期 (選填) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">
@@ -299,26 +259,26 @@
               結束日期 <span class="text-slate-400 font-normal">(選填)</span>
             </label>
             <input type="date" id="schedEndDate" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
-            <span class="text-[11px] text-slate-400 mt-1 block">單日事項可留空</span>
+            <span class="text-[11px] text-slate-400 mt-1 block">單日活動留空即可</span>
           </div>
         </div>
 
-        <!-- Attendee checkboxes -->
+        <!-- 指派與會人員 (複選) -->
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
             <span>指派與會人員 (可複選)</span>
-            <span class="text-slate-400 font-normal text-[11px]">勾選參與此排程的人員</span>
+            <span class="text-slate-400 font-normal text-[11px]">勾選參與此事項的名單</span>
           </label>
-          <div id="attendeeSelectContainer" class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 max-h-44 overflow-y-auto space-y-1.5">
-            <!-- Dynamically populated -->
+          <div id="attendeeSelectContainer" class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 max-h-40 overflow-y-auto space-y-1.5">
+            <!-- 動態產生核取方塊 -->
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeAddScheduleModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+          <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
             取消
           </button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 shadow-sm transition">
+          <button type="submit" id="schedSubmitBtn" class="px-5 py-2 rounded-xl bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 shadow-xs transition">
             建立排程
           </button>
         </div>
@@ -326,31 +286,35 @@
     </div>
   </div>
 
-  <div id="addAttendeeModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+  <!-- 模態視窗 2：與會人員 新增 / 編輯 Modal -->
+  <div id="attendeeModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <i class="ph-bold ph-user-plus"></i>
+            <i id="attendeeModalIcon" class="ph-bold ph-user-plus text-lg"></i>
           </div>
-          <h3 class="text-base font-bold text-slate-800">新增與會人員</h3>
+          <h3 id="attendeeModalTitle" class="text-base font-bold text-slate-800">新增與會人員</h3>
         </div>
-        <button onclick="closeAddAttendeeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+        <button onclick="closeAttendeeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
           <i class="ph-bold ph-x text-lg"></i>
         </button>
       </div>
 
-      <form id="addAttendeeForm" onsubmit="event.preventDefault(); submitNewAttendee();" class="mt-4 space-y-4">
+      <form id="attendeeForm" onsubmit="event.preventDefault(); submitAttendeeForm();" class="mt-4 space-y-4">
+        <input type="hidden" id="attEditId" value="">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">人員姓名 <span class="text-rose-500">*</span></label>
-          <input type="text" id="attName" required placeholder="例如：王小明" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">
+            人員姓名 <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="attName" required placeholder="例如：王小明" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
         </div>
 
         <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeAddAttendeeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+          <button type="button" onclick="closeAttendeeModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
             取消
           </button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">
+          <button type="submit" id="attSubmitBtn" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-xs transition">
             儲存人員
           </button>
         </div>
@@ -358,381 +322,453 @@
     </div>
   </div>
 
-  <div id="confirmModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+  <!-- 模態視窗 3：管理員驗證 Modal -->
+  <div id="adminModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100">
-      <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center text-xl mb-3 mx-auto">
-        <i class="ph-bold ph-trash"></i>
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+            <i class="ph-bold ph-shield-check text-lg"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800">管理員身分切換</h3>
+        </div>
+        <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
       </div>
-      <h3 id="confirmTitle" class="text-center text-base font-bold text-slate-800">確認刪除</h3>
-      <p id="confirmMessage" class="text-center text-xs text-slate-500 mt-1 mb-5">
-        您確定要刪除這筆資料嗎？此動作無法復原。
-      </p>
 
-      <div class="flex items-center gap-2.5">
-        <button id="cancelConfirmBtn" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+      <div class="mt-4 space-y-4">
+        <div id="adminLoginView">
+          <p class="text-xs text-slate-500 mb-3">請輸入管理員密鑰解鎖「新增、編輯與刪除」權限（預設密鑰：<span class="font-mono font-semibold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">admin888</span>）：</p>
+          <input type="password" id="adminPasswordInput" placeholder="請輸入管理密碼..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition">
+          <div class="flex items-center justify-end gap-2.5 mt-4">
+            <button onclick="closeAdminModal()" class="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+              取消
+            </button>
+            <button onclick="verifyAdminPassword()" class="px-4 py-2 rounded-xl bg-teal-600 text-white text-xs font-semibold hover:bg-teal-700 shadow-xs transition">
+              解鎖權限
+            </button>
+          </div>
+        </div>
+
+        <div id="adminLogoutView" class="hidden text-center py-2 space-y-3">
+          <p class="text-xs text-slate-600">您目前具備管理員權限，可自由新增、修改與刪除排程及人員。</p>
+          <button onclick="lockAdminRole()" class="w-full px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+            鎖定並切換為訪客唯讀模式
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自訂確認刪除 Modal (取代 window.confirm) -->
+  <div id="confirmModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100 text-center">
+      <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+        <i class="ph-bold ph-trash text-2xl"></i>
+      </div>
+      <h3 id="confirmTitle" class="text-base font-bold text-slate-800">確認刪除？</h3>
+      <p id="confirmDesc" class="text-xs text-slate-500 mt-1 mb-5">此動作無法還原，請確認是否要刪除。</p>
+      
+      <div class="flex items-center justify-center gap-3">
+        <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition flex-1">
           取消
         </button>
-        <button id="okConfirmBtn" class="flex-1 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-xs transition">
+        <button id="confirmExecuteBtn" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 shadow-xs transition flex-1">
           確認刪除
         </button>
       </div>
     </div>
   </div>
 
+  <!-- 自訂輕巧 Toast 提示 (取代 window.alert) -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
-    /* In-Memory State: 初始完全無資料，由使用者自由新增 */
+    /* 系統核心狀態資料 */
     const state = {
       isAdmin: false,
-      adminPin: 'admin888',
+      adminCode: 'admin888',
       schedules: [],
-      attendees: []
+      attendees: [],
+      filterKeyword: '',
+      filterStatus: 'ALL'
     };
 
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      
-      const icons = {
-        success: 'ph-check-circle text-emerald-500',
-        error: 'ph-warning-circle text-rose-500',
-        info: 'ph-info text-teal-600'
-      };
-      
-      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl bg-white border border-slate-200/90 shadow-lg text-xs font-medium text-slate-700 transition-all duration-300 transform translate-y-3 opacity-0`;
-      toast.innerHTML = `
-        <i class="ph-bold ${icons[type] || icons.info} text-base"></i>
-        <span>${message}</span>
-      `;
-      
-      container.appendChild(toast);
-      
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-3', 'opacity-0');
-      });
+    // 本地快取金鑰
+    const STORAGE_KEY = 'schedule_system_data_v2';
 
-      setTimeout(() => {
-        toast.classList.add('translate-y-3', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    function formatScheduleTime(item) {
-      if (!item.startDate) return '未定日期';
-      
-      const formatPart = (dateStr) => {
-        if (!dateStr) return '';
-        const [y, m, d] = dateStr.split('-').map(Number);
-        const dateObj = new Date(y, m - 1, d);
-        const weekDays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-        const dayOfWeek = isNaN(dateObj.getTime()) ? '' : ` (${weekDays[dateObj.getDay()]})`;
-        const monthDay = `${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')}`;
-        return `${monthDay}${dayOfWeek}`;
-      };
-
-      const startFormatted = formatPart(item.startDate);
-      
-      if (!item.endDate || item.endDate === item.startDate) {
-        return startFormatted;
-      }
-
-      const endFormatted = formatPart(item.endDate);
-      return `${startFormatted} ~ ${endFormatted}`;
-    }
-
-    const authToggleBtn = document.getElementById('authToggleBtn');
-    const authModal = document.getElementById('authModal');
-    const adminPasswordInput = document.getElementById('adminPasswordInput');
-    const authErrorMsg = document.getElementById('authErrorMsg');
-
-    authToggleBtn.addEventListener('click', () => {
-      if (state.isAdmin) {
-        state.isAdmin = false;
-        updateRoleUI();
-        showToast('已切換為訪客模式（唯讀）', 'info');
-      } else {
-        openAuthModal();
-      }
+    // 初始化載入
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      renderAllViews();
     });
 
-    function openAuthModal() {
-      authModal.classList.remove('hidden');
-      adminPasswordInput.value = '';
-      authErrorMsg.classList.add('hidden');
-      setTimeout(() => adminPasswordInput.focus(), 50);
+    function saveToStorage() {
+      try {
+        const payload = {
+          schedules: state.schedules,
+          attendees: state.attendees
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        console.error('儲存失敗', e);
+      }
     }
 
-    function closeAuthModal() {
-      authModal.classList.add('hidden');
-    }
-
-    function togglePasswordVis() {
-      const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      adminPasswordInput.setAttribute('type', type);
-      document.getElementById('eyeIcon').className = type === 'password' ? 'ph ph-eye' : 'ph ph-eye-slash';
-    }
-
-    function verifyAdminPassword() {
-      const entered = adminPasswordInput.value.trim();
-      if (entered === state.adminPin) {
-        state.isAdmin = true;
-        closeAuthModal();
-        updateRoleUI();
-        showToast('管理員驗證成功！已解鎖新增與刪除功能', 'success');
-      } else {
-        authErrorMsg.classList.remove('hidden');
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state.schedules = Array.isArray(parsed.schedules) ? parsed.schedules : [];
+          state.attendees = Array.isArray(parsed.attendees) ? parsed.attendees : [];
+        }
+      } catch (e) {
+        console.error('讀取失敗', e);
+        state.schedules = [];
+        state.attendees = [];
       }
     }
 
     function updateRoleUI() {
-      const roleIndicator = document.getElementById('roleIndicator');
-      const roleBadge = document.getElementById('roleBadge');
-      const authIcon = document.getElementById('authIcon');
-      const authActionLabel = document.getElementById('authActionLabel');
-      const permHintBadge = document.getElementById('permHintBadge');
-      const adminStatusHint = document.getElementById('adminStatusHint');
-      const openAddScheduleBtn = document.getElementById('openAddScheduleBtn');
-      const openAddAttendeeBtn = document.getElementById('openAddAttendeeBtn');
+      const badge = document.getElementById('roleBadge');
+      const actionBtns = document.getElementById('adminActionButtons');
+      const lockIcon = document.getElementById('adminLockIcon');
+      const toggleText = document.getElementById('adminToggleText');
+      const addAttendeeHeaderBtn = document.getElementById('addAttendeeHeaderBtn');
 
       if (state.isAdmin) {
-        roleIndicator.className = 'hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-300';
-        roleIndicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>管理員模式</span>';
-        
-        roleBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200';
-        roleBadge.innerText = '管理中';
-
-        permHintBadge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
-        permHintBadge.innerText = '可編輯與刪除';
-
-        authIcon.className = 'ph-bold ph-lock-key-open text-emerald-600';
-        authActionLabel.innerText = '退出管理員';
-        adminStatusHint.innerHTML = '已啟用管理員身分：您現在可以自由<strong>新增</strong>或<strong>刪除</strong>排程與與會人員。';
-        
-        openAddScheduleBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-        openAddAttendeeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+        badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-medium bg-teal-50 text-teal-700 border border-teal-200';
+        badge.innerText = '管理員權限';
+        actionBtns.classList.remove('hidden');
+        lockIcon.className = 'ph-bold ph-lock-key-open text-teal-600 text-sm';
+        toggleText.innerText = '管理員模式';
+        addAttendeeHeaderBtn.classList.remove('hidden');
       } else {
-        roleIndicator.className = 'hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-slate-100 text-slate-600 border-slate-200';
-        roleIndicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span><span>唯讀檢視模式</span>';
-        
-        roleBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600 border border-slate-200';
-        roleBadge.innerText = '訪客唯讀';
-
-        permHintBadge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600';
-        permHintBadge.innerText = '唯讀';
-
-        authIcon.className = 'ph-bold ph-lock-key text-teal-600';
-        authActionLabel.innerText = '管理員解鎖';
-        adminStatusHint.innerHTML = '目前為訪客檢視模式。點擊右上角解鎖管理員以新增或刪除排程與人員。';
+        badge.className = 'text-xs px-2.5 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600 border border-slate-200';
+        badge.innerText = '訪客唯讀';
+        actionBtns.classList.add('hidden');
+        lockIcon.className = 'ph-bold ph-lock text-slate-500 text-sm';
+        toggleText.innerText = '管理員解鎖';
+        addAttendeeHeaderBtn.classList.add('hidden');
       }
+    }
 
+    function toggleAdminModal() {
+      const modal = document.getElementById('adminModal');
+      const loginView = document.getElementById('adminLoginView');
+      const logoutView = document.getElementById('adminLogoutView');
+      const pwdInput = document.getElementById('adminPasswordInput');
+
+      if (state.isAdmin) {
+        loginView.classList.add('hidden');
+        logoutView.classList.remove('hidden');
+      } else {
+        loginView.classList.remove('hidden');
+        logoutView.classList.add('hidden');
+        pwdInput.value = '';
+      }
+      modal.classList.remove('hidden');
+      if (!state.isAdmin) pwdInput.focus();
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.add('hidden');
+    }
+
+    function verifyAdminPassword() {
+      const pwd = document.getElementById('adminPasswordInput').value.trim();
+      if (pwd === state.adminCode) {
+        state.isAdmin = true;
+        updateRoleUI();
+        closeAdminModal();
+        renderAllViews();
+        showToast('管理員驗證成功，已解鎖編輯權限！', 'success');
+      } else {
+        showToast('密碼錯誤，請確認輸入', 'error');
+      }
+    }
+
+    function lockAdminRole() {
+      state.isAdmin = false;
+      updateRoleUI();
+      closeAdminModal();
       renderAllViews();
+      showToast('已切換回訪客唯讀模式', 'info');
     }
 
-    function handleOpenAddSchedule() {
-      if (!state.isAdmin) {
-        showToast('只有管理員可以新增排程，請先點擊右上角解鎖身分。', 'error');
-        openAuthModal();
-        return;
+    function formatScheduleDate(startDate, endDate) {
+      if (!startDate) return '';
+      const formatStr = (dStr) => {
+        const parts = dStr.split('-');
+        if (parts.length === 3) {
+          const d = new Date(parts[0], parts[1] - 1, parts[2]);
+          const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+          return `${Number(parts[1])}/${Number(parts[2])} (${weekdays[d.getDay()]})`;
+        }
+        return dStr;
+      };
+
+      if (!endDate || endDate === startDate) {
+        return formatStr(startDate);
       }
-      openAddScheduleModal();
-    }
-
-    function handleOpenAddAttendee() {
-      if (!state.isAdmin) {
-        showToast('只有管理員可以新增人員，請先點擊右上角解鎖身分。', 'error');
-        openAuthModal();
-        return;
-      }
-      openAddAttendeeModal();
-    }
-
-    function getFilteredSchedules() {
-      const searchVal = document.getElementById('scheduleSearchInput').value.toLowerCase().trim();
-      const statusVal = document.getElementById('statusFilter').value;
-      const crewVal = document.getElementById('crewFilter').value;
-
-      return state.schedules.filter(sched => {
-        const matchesSearch = !searchVal || 
-          sched.title.toLowerCase().includes(searchVal);
-
-        const matchesStatus = statusVal === 'all' || sched.status === statusVal;
-        const matchesCrew = crewVal === 'all' || (sched.attendeeIds && sched.attendeeIds.includes(crewVal));
-
-        return matchesSearch && matchesStatus && matchesCrew;
-      }).sort((a, b) => {
-        const aKey = a.startDate || '';
-        const bKey = b.startDate || '';
-        return aKey.localeCompare(bKey);
-      });
+      return `${formatStr(startDate)} ~ ${formatStr(endDate)}`;
     }
 
     function getStatusBadge(status) {
-      if (status === '進行中') {
-        return '<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">進行中</span>';
+      switch (status) {
+        case '進行中':
+          return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>進行中</span>`;
+        case '已完成':
+          return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>已完成</span>`;
+        default:
+          return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200/80 inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>未開始</span>`;
       }
-      if (status === '已完成') {
-        return '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">已完成</span>';
-      }
-      return '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-teal-50 text-teal-700 border border-teal-200">未開始</span>';
     }
 
-    function renderTimeline(schedules) {
-      const container = document.getElementById('timelineContainer');
-      if (schedules.length === 0) {
-        container.innerHTML = `
-          <div class="py-10 text-center text-slate-400">
-            <i class="ph ph-calendar-x text-2xl mb-1.5 text-slate-300"></i>
-            <p class="text-xs">尚無符合條件的排程資料，請點擊上方「新增排程」開始建立</p>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = schedules.map(item => {
-        const crewTags = (item.attendeeIds || []).map(id => {
-          const person = state.attendees.find(a => a.id === id);
-          if (!person) return '';
-          return `
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] border border-slate-200/60 font-medium">
-              <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${person.color || '#64748b'}"></span>
-              ${person.name}
-            </span>
-          `;
-        }).join('');
-
-        const deleteButton = state.isAdmin ? `
-          <button onclick="requestDeleteSchedule('${item.id}')" title="刪除此排程" class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
-            <i class="ph-bold ph-trash text-sm"></i>
-          </button>
-        ` : '';
-
-        return `
-          <div class="relative group">
-            <div class="absolute -left-[31px] top-2.5 w-3 h-3 rounded-full bg-white border-3 border-teal-500 shadow-xs"></div>
-            
-            <div class="bg-slate-50/70 hover:bg-white rounded-xl border border-slate-200/80 p-3.5 transition-all hover:shadow-xs">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                <div class="flex flex-wrap items-center gap-2">
-                  <h3 class="text-sm font-bold text-slate-900">${item.title}</h3>
-                  ${getStatusBadge(item.status)}
-                </div>
-                <div class="flex items-center gap-2 text-xs text-slate-400">
-                  <span class="font-mono bg-white px-2 py-0.5 rounded border border-slate-200/80 text-[11px] font-medium text-slate-600">${formatScheduleTime(item)}</span>
-                  ${deleteButton}
-                </div>
-              </div>
-
-              <div class="mt-2.5 pt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 text-xs">
-                ${item.location ? `
-                <div class="flex items-center gap-1 text-slate-500">
-                  <i class="ph-bold ph-map-pin text-teal-600"></i>
-                  <span>${item.location}</span>
-                </div>` : '<div></div>'}
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="text-[11px] text-slate-400">與會:</span>
-                  ${crewTags || '<span class="text-[11px] text-slate-400">未指派</span>'}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderCrew() {
-      const grid = document.getElementById('crewListGrid');
-      if (state.attendees.length === 0) {
-        grid.innerHTML = `
-          <div class="py-8 text-center text-slate-400">
-            <i class="ph ph-users text-2xl mb-1 text-slate-300"></i>
-            <p class="text-xs">尚無人員名單</p>
-          </div>
-        `;
-        return;
-      }
-
-      grid.innerHTML = state.attendees.map(att => {
-        const scheduleCount = state.schedules.filter(s => (s.attendeeIds || []).includes(att.id)).length;
-        
-        const deleteButton = state.isAdmin ? `
-          <button onclick="requestDeleteAttendee('${att.id}')" title="刪除此成員" class="p-1 rounded-md text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition">
-            <i class="ph-bold ph-trash text-sm"></i>
-          </button>
-        ` : '';
-
-        return `
-          <div class="bg-slate-50/70 hover:bg-white rounded-xl border border-slate-200/80 p-2.5 transition hover:shadow-xs flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-xs" style="background-color: ${att.color || '#0d9488'}">
-                ${att.name.slice(0, 1)}
-              </div>
-              <div>
-                <h4 class="text-xs font-bold text-slate-900">${att.name}</h4>
-                <span class="text-[10px] font-semibold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded-full inline-block mt-0.5">${scheduleCount} 項排程</span>
-              </div>
-            </div>
-            ${deleteButton}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function updateMetrics() {
-      document.getElementById('statTotalShows').innerText = state.schedules.length;
-      const activeCount = state.schedules.filter(s => s.status === '進行中').length;
-      document.getElementById('statActiveShows').innerText = activeCount;
-      document.getElementById('statTotalCrew').innerText = state.attendees.length;
-
-      const crewFilter = document.getElementById('crewFilter');
-      const currentSelected = crewFilter.value;
-      crewFilter.innerHTML = '<option value="all">所有人員</option>' + 
-        state.attendees.map(a => `<option value="${a.id}" ${currentSelected === a.id ? 'selected' : ''}>${a.name}</option>`).join('');
+    function handleFilterChange() {
+      state.filterKeyword = document.getElementById('searchInput').value.trim().toLowerCase();
+      state.filterStatus = document.getElementById('statusFilter').value;
+      renderScheduleList();
     }
 
     function renderAllViews() {
-      const filtered = getFilteredSchedules();
-      renderTimeline(filtered);
-      renderCrew();
-      updateMetrics();
+      updateRoleUI();
+      renderStats();
+      renderScheduleList();
+      renderAttendeesList();
+    }
+
+    function renderStats() {
+      document.getElementById('statTotal').innerText = state.schedules.length;
+      document.getElementById('statOngoing').innerText = state.schedules.filter(s => s.status === '進行中').length;
+      document.getElementById('statCompleted').innerText = state.schedules.filter(s => s.status === '已完成').length;
+      document.getElementById('statAttendees').innerText = state.attendees.length;
+
+      document.getElementById('scheduleCountBadge').innerText = `${state.schedules.length} 項`;
+      document.getElementById('attendeeCountBadge').innerText = `${state.attendees.length} 位`;
+    }
+
+    function renderScheduleList() {
+      const container = document.getElementById('scheduleListContainer');
+
+      // 篩選
+      let items = state.schedules.filter(s => {
+        const matchesStatus = (state.filterStatus === 'ALL') || (s.status === state.filterStatus);
+        const matchesKeyword = !state.filterKeyword || 
+          s.title.toLowerCase().includes(state.filterKeyword) || 
+          (s.location && s.location.toLowerCase().includes(state.filterKeyword));
+        return matchesStatus && matchesKeyword;
+      });
+
+      // 依開始日期排序
+      items.sort((a, b) => (a.startDate || '').localeCompare(b.startDate || ''));
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center border-2 border-dashed border-slate-200 rounded-2xl p-6">
+            <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
+              <i class="ph-bold ph-calendar-blank text-2xl"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-700">目前尚無符合的排程</h4>
+            <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+              ${state.isAdmin ? '點擊上方「新增排程」按鈕，立即建立第一筆排程事項！' : '目前尚無排程記錄，管理員解鎖後可進行建立。'}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        // 解析指派與會人員
+        const assignedCrew = (item.attendeeIds || [])
+          .map(id => state.attendees.find(a => a.id === id))
+          .filter(Boolean);
+
+        const attendeesHtml = assignedCrew.length > 0 
+          ? assignedCrew.map(c => `
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200/80">
+                <span class="w-2 h-2 rounded-full" style="background-color: ${c.color || '#0d9488'}"></span>
+                ${c.name}
+              </span>
+            `).join('')
+          : '<span class="text-slate-400 text-[11px]">未指派人員</span>';
+
+        const locationHtml = item.location 
+          ? `<span class="inline-flex items-center gap-1 text-xs text-slate-600 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+               <i class="ph-bold ph-map-pin text-teal-600"></i> ${item.location}
+             </span>` 
+          : '';
+
+        const adminActions = state.isAdmin ? `
+          <div class="flex items-center gap-1">
+            <button onclick="openEditScheduleModal('${item.id}')" title="編輯此排程" class="p-1.5 rounded-lg text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition">
+              <i class="ph-bold ph-pencil-simple text-sm"></i>
+            </button>
+            <button onclick="requestDeleteSchedule('${item.id}')" title="刪除此排程" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+              <i class="ph-bold ph-trash text-sm"></i>
+            </button>
+          </div>
+        ` : '';
+
+        return `
+          <div class="bg-white hover:border-teal-300 rounded-xl border border-slate-200/90 p-4 transition-all shadow-2xs hover:shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-sm font-bold text-slate-900">${item.title}</h3>
+                ${getStatusBadge(item.status)}
+                ${locationHtml}
+              </div>
+
+              <div class="flex items-center justify-between sm:justify-end gap-2 text-xs">
+                <span class="font-mono bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+                  <i class="ph-bold ph-calendar text-teal-600"></i>
+                  ${formatScheduleDate(item.startDate, item.endDate)}
+                </span>
+                ${adminActions}
+              </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-slate-400 text-[11px] font-medium mr-1">與會成員:</span>
+                ${attendeesHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAttendeesList() {
+      const container = document.getElementById('attendeeListContainer');
+
+      if (state.attendees.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl p-4">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-2">
+              <i class="ph-bold ph-users text-xl"></i>
+            </div>
+            <h4 class="text-xs font-bold text-slate-700">目前尚無人員資料</h4>
+            <p class="text-[11px] text-slate-400 mt-1">
+              ${state.isAdmin ? '點擊右上角「新增人員」加入名冊' : '待管理員登錄人員名單'}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.attendees.map(att => {
+        // 計算該人員參與的排程數
+        const count = state.schedules.filter(s => (s.attendeeIds || []).includes(att.id)).length;
+
+        const actionBtns = state.isAdmin ? `
+          <div class="flex items-center gap-0.5">
+            <button onclick="openEditAttendeeModal('${att.id}')" title="修改人員" class="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition">
+              <i class="ph-bold ph-pencil-simple text-xs"></i>
+            </button>
+            <button onclick="requestDeleteAttendee('${att.id}')" title="刪除人員" class="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+              <i class="ph-bold ph-trash text-xs"></i>
+            </button>
+          </div>
+        ` : '';
+
+        return `
+          <div class="bg-slate-50/70 hover:bg-white rounded-xl border border-slate-200/80 p-2.5 transition flex items-center justify-between gap-2 shadow-2xs hover:shadow-xs">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-2xs shrink-0" style="background-color: ${att.color || '#0d9488'}">
+                ${att.name.slice(0, 1)}
+              </div>
+              <div class="truncate">
+                <h4 class="text-xs font-bold text-slate-900 truncate">${att.name}</h4>
+                <span class="text-[10px] font-semibold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded-full inline-block mt-0.5 border border-teal-100">
+                  ${count} 項排程
+                </span>
+              </div>
+            </div>
+            ${actionBtns}
+          </div>
+        `;
+      }).join('');
     }
 
     function openAddScheduleModal() {
-      document.getElementById('addScheduleModal').classList.remove('hidden');
-      document.getElementById('addScheduleForm').reset();
-      
+      if (!state.isAdmin) {
+        showToast('請先切換為管理員模式', 'info');
+        toggleAdminModal();
+        return;
+      }
+      document.getElementById('scheduleModal').classList.remove('hidden');
+      document.getElementById('scheduleForm').reset();
+      document.getElementById('schedEditId').value = '';
+      document.getElementById('scheduleModalTitle').innerText = '新增排程項目';
+      document.getElementById('scheduleModalIcon').className = 'ph-bold ph-calendar-plus text-lg';
+      document.getElementById('schedSubmitBtn').innerText = '建立排程';
+
       const today = new Date();
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const dd = String(today.getDate()).padStart(2, '0');
-      
       document.getElementById('schedStartDate').value = `${yyyy}-${mm}-${dd}`;
       document.getElementById('schedEndDate').value = '';
 
+      renderAttendeeCheckboxes([]);
+    }
+
+    function openEditScheduleModal(id) {
+      if (!state.isAdmin) {
+        showToast('管理員權限已鎖定', 'error');
+        return;
+      }
+      const item = state.schedules.find(s => s.id === id);
+      if (!item) return;
+
+      document.getElementById('scheduleModal').classList.remove('hidden');
+      document.getElementById('schedEditId').value = item.id;
+      document.getElementById('scheduleModalTitle').innerText = '編輯排程項目';
+      document.getElementById('scheduleModalIcon').className = 'ph-bold ph-pencil-simple text-lg';
+      document.getElementById('schedSubmitBtn').innerText = '儲存修改';
+
+      document.getElementById('schedTitle').value = item.title;
+      document.getElementById('schedLocation').value = item.location || '';
+      document.getElementById('schedStatus').value = item.status || '未開始';
+      document.getElementById('schedStartDate').value = item.startDate || '';
+      document.getElementById('schedEndDate').value = item.endDate || '';
+
+      renderAttendeeCheckboxes(item.attendeeIds || []);
+    }
+
+    function renderAttendeeCheckboxes(selectedIds = []) {
       const container = document.getElementById('attendeeSelectContainer');
       if (state.attendees.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400">目前尚無人員資料，可先建立排程，稍後再新增人員並指派。</p>';
-      } else {
-        container.innerHTML = state.attendees.map(a => `
-          <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white text-xs cursor-pointer select-none">
-            <input type="checkbox" name="selectedCrew" value="${a.id}" class="rounded text-teal-600 focus:ring-teal-500 w-3.5 h-3.5">
-            <span class="w-2 h-2 rounded-full" style="background-color: ${a.color}"></span>
-            <span class="font-medium text-slate-800">${a.name}</span>
-          </label>
-        `).join('');
-      }
-    }
-
-    function closeAddScheduleModal() {
-      document.getElementById('addScheduleModal').classList.add('hidden');
-    }
-
-    function submitNewSchedule() {
-      if (!state.isAdmin) {
-        showToast('只有管理員能執行新增操作', 'error');
+        container.innerHTML = '<p class="text-xs text-slate-400">目前尚無人員資料，可先儲存排程，稍後再新增人員並關聯。</p>';
         return;
       }
 
+      container.innerHTML = state.attendees.map(a => {
+        const isChecked = selectedIds.includes(a.id) ? 'checked' : '';
+        return `
+          <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-white text-xs cursor-pointer select-none">
+            <input type="checkbox" name="selectedCrew" value="${a.id}" ${isChecked} class="rounded text-teal-600 focus:ring-teal-500 w-3.5 h-3.5">
+            <span class="w-2 h-2 rounded-full" style="background-color: ${a.color}"></span>
+            <span class="font-medium text-slate-800">${a.name}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function closeScheduleModal() {
+      document.getElementById('scheduleModal').classList.add('hidden');
+    }
+
+    function submitScheduleForm() {
+      if (!state.isAdmin) {
+        showToast('只有管理員能執行此操作', 'error');
+        return;
+      }
+
+      const editId = document.getElementById('schedEditId').value;
       const title = document.getElementById('schedTitle').value.trim();
       const location = document.getElementById('schedLocation').value.trim();
       const startDate = document.getElementById('schedStartDate').value;
@@ -745,38 +781,82 @@
         return;
       }
 
-      const newSchedule = {
-        id: 'sc-' + Date.now(),
-        title,
-        location,
-        startDate,
-        endDate,
-        status,
-        attendeeIds: checkedCrew
-      };
+      if (editId) {
+        const idx = state.schedules.findIndex(s => s.id === editId);
+        if (idx !== -1) {
+          state.schedules[idx] = {
+            ...state.schedules[idx],
+            title,
+            location,
+            startDate,
+            endDate,
+            status,
+            attendeeIds: checkedCrew
+          };
+          showToast(`已更新排程：「${title}」`, 'success');
+        }
+      } else {
+        const newSched = {
+          id: 'sc-' + Date.now(),
+          title,
+          location,
+          startDate,
+          endDate,
+          status,
+          attendeeIds: checkedCrew
+        };
+        state.schedules.push(newSched);
+        showToast(`已新增排程：「${title}」`, 'success');
+      }
 
-      state.schedules.push(newSchedule);
-      closeAddScheduleModal();
+      saveToStorage();
+      closeScheduleModal();
       renderAllViews();
-      showToast(`已成功新增排程：「${title}」`, 'success');
     }
 
     function openAddAttendeeModal() {
-      document.getElementById('addAttendeeModal').classList.remove('hidden');
-      document.getElementById('addAttendeeForm').reset();
+      if (!state.isAdmin) {
+        showToast('請先切換為管理員模式', 'info');
+        toggleAdminModal();
+        return;
+      }
+      document.getElementById('attendeeModal').classList.remove('hidden');
+      document.getElementById('attendeeForm').reset();
+      document.getElementById('attEditId').value = '';
+      document.getElementById('attendeeModalTitle').innerText = '新增與會人員';
+      document.getElementById('attendeeModalIcon').className = 'ph-bold ph-user-plus text-lg';
+      document.getElementById('attSubmitBtn').innerText = '儲存人員';
       document.getElementById('attName').focus();
     }
 
-    function closeAddAttendeeModal() {
-      document.getElementById('addAttendeeModal').classList.add('hidden');
+    function openEditAttendeeModal(id) {
+      if (!state.isAdmin) {
+        showToast('管理員權限已鎖定', 'error');
+        return;
+      }
+      const person = state.attendees.find(a => a.id === id);
+      if (!person) return;
+
+      document.getElementById('attendeeModal').classList.remove('hidden');
+      document.getElementById('attEditId').value = person.id;
+      document.getElementById('attendeeModalTitle').innerText = '編輯與會人員';
+      document.getElementById('attendeeModalIcon').className = 'ph-bold ph-pencil-simple text-lg';
+      document.getElementById('attSubmitBtn').innerText = '儲存修改';
+      document.getElementById('attName').value = person.name;
+      document.getElementById('attName').focus();
     }
 
-    function submitNewAttendee() {
+    function closeAttendeeModal() {
+      document.getElementById('attendeeModal').classList.add('hidden');
+    }
+
+    function submitAttendeeForm() {
       if (!state.isAdmin) {
-        showToast('只有管理員能執行此新增操作', 'error');
+        showToast('只有管理員能執行此操作', 'error');
         return;
       }
 
+      const editId = document.getElementById('attEditId').value;
       const name = document.getElementById('attName').value.trim();
 
       if (!name) {
@@ -784,92 +864,109 @@
         return;
       }
 
-      const palette = ['#0d9488', '#6366f1', '#0284c7', '#8b5cf6', '#ea580c', '#10b981', '#ec4899'];
-      const randomColor = palette[Math.floor(Math.random() * palette.length)];
+      if (editId) {
+        const idx = state.attendees.findIndex(a => a.id === editId);
+        if (idx !== -1) {
+          state.attendees[idx].name = name;
+          showToast(`已更新人員姓名為：「${name}」`, 'success');
+        }
+      } else {
+        const palette = ['#0d9488', '#6366f1', '#0284c7', '#8b5cf6', '#ea580c', '#10b981', '#ec4899', '#f59e0b'];
+        const randomColor = palette[Math.floor(Math.random() * palette.length)];
 
-      const newAttendee = {
-        id: 'att-' + Date.now(),
-        name,
-        color: randomColor
-      };
+        const newAttendee = {
+          id: 'att-' + Date.now(),
+          name,
+          color: randomColor
+        };
+        state.attendees.push(newAttendee);
+        showToast(`已登錄人員：「${name}」`, 'success');
+      }
 
-      state.attendees.push(newAttendee);
-      closeAddAttendeeModal();
+      saveToStorage();
+      closeAttendeeModal();
       renderAllViews();
-      showToast(`已成功登錄人員：「${name}」`, 'success');
     }
 
     let pendingAction = null;
-    const confirmModal = document.getElementById('confirmModal');
-    const confirmTitle = document.getElementById('confirmTitle');
-    const confirmMessage = document.getElementById('confirmMessage');
-    const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
-    const okConfirmBtn = document.getElementById('okConfirmBtn');
-
-    function openConfirm(title, message, onConfirm) {
-      confirmTitle.innerText = title;
-      confirmMessage.innerText = message;
-      pendingAction = onConfirm;
-      confirmModal.classList.remove('hidden');
-    }
-
-    function closeConfirm() {
-      confirmModal.classList.add('hidden');
-      pendingAction = null;
-    }
-
-    cancelConfirmBtn.addEventListener('click', closeConfirm);
-    okConfirmBtn.addEventListener('click', () => {
-      if (typeof pendingAction === 'function') {
-        pendingAction();
-      }
-      closeConfirm();
-    });
 
     function requestDeleteSchedule(id) {
-      if (!state.isAdmin) {
-        showToast('只有管理員能刪除排程', 'error');
-        return;
-      }
+      if (!state.isAdmin) return;
       const item = state.schedules.find(s => s.id === id);
       if (!item) return;
 
-      openConfirm('確定刪除排程？', `即將刪除「${item.title}」。此操作將永久移除。`, () => {
+      document.getElementById('confirmTitle').innerText = '確認刪除排程？';
+      document.getElementById('confirmDesc').innerText = `即將刪除「${item.title}」，此動作無法復原。`;
+      pendingAction = () => {
         state.schedules = state.schedules.filter(s => s.id !== id);
+        saveToStorage();
         renderAllViews();
-        showToast('排程已順利刪除', 'info');
-      });
+        showToast(`已刪除排程：「${item.title}」`, 'info');
+      };
+      document.getElementById('confirmModal').classList.remove('hidden');
     }
 
     function requestDeleteAttendee(id) {
-      if (!state.isAdmin) {
-        showToast('只有管理員能刪除人員', 'error');
-        return;
-      }
+      if (!state.isAdmin) return;
       const person = state.attendees.find(a => a.id === id);
       if (!person) return;
 
-      openConfirm('確定刪除與會人員？', `即將刪除「${person.name}」，並自所有已排定之排程指派中解除。`, () => {
+      document.getElementById('confirmTitle').innerText = '確認刪除人員？';
+      document.getElementById('confirmDesc').innerText = `即將刪除「${person.name}」，相關排程的指派亦將同步解除。`;
+      pendingAction = () => {
         state.attendees = state.attendees.filter(a => a.id !== id);
+        // 同步從排程中移除此人員
         state.schedules.forEach(s => {
           if (s.attendeeIds) {
             s.attendeeIds = s.attendeeIds.filter(attId => attId !== id);
           }
         });
+        saveToStorage();
         renderAllViews();
-        showToast(`已移除與會人員「${person.name}」`, 'info');
-      });
+        showToast(`已刪除人員：「${person.name}」`, 'info');
+      };
+      document.getElementById('confirmModal').classList.remove('hidden');
     }
 
-    // 篩選與搜尋監聽
-    document.getElementById('scheduleSearchInput').addEventListener('input', renderAllViews);
-    document.getElementById('statusFilter').addEventListener('change', renderAllViews);
-    document.getElementById('crewFilter').addEventListener('change', renderAllViews);
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      pendingAction = null;
+    }
 
-    // 初始化啟動
-    window.addEventListener('DOMContentLoaded', () => {
-      updateRoleUI();
+    document.getElementById('confirmExecuteBtn').addEventListener('click', () => {
+      if (pendingAction) {
+        pendingAction();
+      }
+      closeConfirmModal();
     });
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      const icons = {
+        success: 'ph-check-circle text-emerald-500',
+        error: 'ph-warning-circle text-rose-500',
+        info: 'ph-info text-teal-500'
+      };
+
+      toast.className = 'flex items-center gap-2.5 px-4 py-3 bg-white rounded-xl shadow-lg border border-slate-200 text-xs font-semibold text-slate-800 transition-all transform translate-y-3 opacity-0 pointer-events-auto';
+      toast.innerHTML = `
+        <i class="ph-bold ${icons[type] || icons.info} text-base shrink-0"></i>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-1');
+        setTimeout(() => toast.remove(), 250);
+      }, 2800);
+    }
   </script>
 </body>
 </html>
